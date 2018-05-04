@@ -65,16 +65,16 @@ public class Listener extends Thread {
                         if (!isAvailableUser((String) jsonObject.get("ip")) && !isBannedUser((String) jsonObject.get("ip"))) {
                             availableUsers.add(new User((String) jsonObject.get("ip"), (String) jsonObject.get("username"), true));
                             for (User user : availableUsers) {
-                            if (user.online) {
-                                JSONObject jsonToUser = new JSONObject();
-                                JSONArray users = new JSONArray();
-                                users.addAll(availableUsers);
-                                jsonToUser.put("type", "sendusers");
-                                jsonToUser.put("availableusers", users);
-                                transmitter.setData(jsonToUser, user.ip);
-                                transmitter.start();
+                                if (user.online) {
+                                    JSONObject jsonToUser = new JSONObject();
+                                    JSONArray users = new JSONArray();
+                                    users.addAll(availableUsers);
+                                    jsonToUser.put("type", "sendusers");
+                                    jsonToUser.put("availableusers", users);
+                                    transmitter.setData(jsonToUser, user.ip);
+                                    transmitter.start();
+                                }
                             }
-                        }
                         }
 
                     } else if (type.equals("ban")) {
