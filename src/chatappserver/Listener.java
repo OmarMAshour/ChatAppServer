@@ -17,6 +17,7 @@ import java.net.Socket;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import static chatappserver.ChatAppServer.*;
+import java.util.ArrayList;
 import org.json.simple.JSONArray;
 import org.json.simple.parser.ParseException;
 
@@ -72,6 +73,37 @@ public class Listener extends Thread {
                             transmitter.start();
                         }
 
+                    } else if (type.equals("ban")) {
+
+                        ArrayList<String> IPsToBan = (ArrayList<String>) jsonObject.get("iplist");
+
+                        for (String iptoban : IPsToBan) {
+                            for (int i = 0; i < availableUsers.size(); i++) {
+                                if (availableUsers.get(i).ip.equals(iptoban)) {
+                                    bannedUsers.add(new User(availableUsers.get(i).ip, availableUsers.get(i).username, true));
+                                    availableUsers.remove(availableUsers.get(i));
+                                }
+                            }
+                        }
+                    } else if (type.equals("disconnect")) {
+                        String ip = (String) jsonObject.get("ip");
+                        for (User user : availableUsers) {
+                            if (user.ip.equals(ip)) {
+                                user.online = false;
+
+                            }
+                        }
+                        for (User user : availableUsers) {
+                            if (user.online) {
+                                JSONObject jsonToUser = new JSONObject();
+                                JSONArray users = new JSONArray();
+                                users.addAll(availableUsers);
+                                jsonToUser.put("type", "sendusers");
+                                jsonToUser.put("availableusers", users);
+                                transmitter.setData(jsonToUser, user.ip);
+                                transmitter.start();
+                            }
+                        }
                     }
                 }
             }
