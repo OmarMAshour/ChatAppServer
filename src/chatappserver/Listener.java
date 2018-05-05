@@ -72,27 +72,36 @@ public class Listener extends Thread {
                                     JSONObject jsonToUser = new JSONObject();
 //                                    JSONArray users = new JSONArray();
 //                                    users.addAll(availableUsers);
-                                    Type ListType = new TypeToken<ArrayList<User>>(){}.getType();
+                                    Type ListType = new TypeToken<ArrayList<User>>() {
+                                    }.getType();
                                     Gson gson = new Gson();
-                                    String jsonArrayList= gson.toJson(availableUsers, ListType);
+                                    String jsonArrayList = gson.toJson(availableUsers, ListType);
                                     System.out.println();
                                     jsonToUser.put("type", "sendusers");
                                     jsonToUser.put("availableusers", jsonArrayList);
                                     transmitter.setData(jsonToUser, user.ip);
-                                    transmitter.start();
+                                    transmitter.run();
                                 }
                             }
                         }
 
                     } else if (type.equals("ban")) {
-
-                        ArrayList<String> IPsToBan = (ArrayList<String>) jsonObject.get("iplist");
+                        Gson gson = new Gson();
+                        TypeToken<ArrayList<String>> token = new TypeToken<ArrayList<String>>() {
+                        };
+                        String json = (String) jsonObject.get("iplist");
+                        ArrayList<String> IPsToBan = gson.fromJson(json, token.getType());
 
                         for (String iptoban : IPsToBan) {
                             for (int i = 0; i < availableUsers.size(); i++) {
                                 if (availableUsers.get(i).ip.equals(iptoban)) {
                                     bannedUsers.add(new User(availableUsers.get(i).ip, availableUsers.get(i).username, true));
+                                    JSONObject banObject = new JSONObject();
+                                    banObject.put("type", "banned");
+                                    transmitter.setData(banObject, availableUsers.get(i).ip);
+                                    transmitter.run();
                                     availableUsers.remove(availableUsers.get(i));
+
                                 }
                             }
                         }
@@ -107,13 +116,63 @@ public class Listener extends Thread {
                         for (User user : availableUsers) {
                             if (user.online) {
                                 JSONObject jsonToUser = new JSONObject();
-                                JSONArray users = new JSONArray();
-                                users.addAll(availableUsers);
+//                                    JSONArray users = new JSONArray();
+//                                    users.addAll(availableUsers);
+                                Type ListType = new TypeToken<ArrayList<User>>() {
+                                }.getType();
+                                Gson gson = new Gson();
+                                String jsonArrayList = gson.toJson(availableUsers, ListType);
+                                System.out.println();
                                 jsonToUser.put("type", "sendusers");
-                                jsonToUser.put("availableusers", users);
+                                jsonToUser.put("availableusers", jsonArrayList);
                                 transmitter.setData(jsonToUser, user.ip);
-                                transmitter.start();
+                                transmitter.run();
                             }
+                        }
+                    } else if (type.equals("multimsg")) {
+                        int roomnumber = (int) jsonObject.get("roomnumber");
+                        for (MultiChat chat : multiChats) {
+                            if (chat.roomNumber == roomnumber) {
+                                for (User user : chat.roomUsers) {
+                                    JSONObject toUserObject = new JSONObject();
+                                    toUserObject.put("type", "multimsg");
+                                    toUserObject.put("roomnumber", (int) chat.roomNumber);
+                                    toUserObject.put("msg", (String) jsonObject.get("msg"));
+
+                                    transmitter.setData(toUserObject, user.ip);
+                                    transmitter.run();
+                                }
+                            }
+                        }
+                    } else if (type.equals("openmulti")) {
+                        Gson gson = new Gson();
+                        TypeToken<ArrayList<String>> token = new TypeToken<ArrayList<String>>() {
+                        };
+                        String json = (String) jsonObject.get("ips");
+                        ArrayList<String> ips = new ArrayList<String>();
+                        ArrayList<User> roomUsers = new ArrayList<User>();
+                        ips = gson.fromJson(json, token.getType());
+
+                        for (String ip : ips) {
+                            for (User user : availableUsers) {
+                                if (user.ip.equals(ip)) {
+                                    roomUsers.add(user);
+                                }
+                            }
+                        }
+                        MultiChat chat = new MultiChat(roomUsers);
+                        JSONObject sendobject = new JSONObject();
+                        sendobject.put("type", "openmulti");
+                        Type ListType = new TypeToken<ArrayList<User>>() {
+                        }.getType();
+                        Gson gsonn = new Gson();
+                        String jsonArrayList = gsonn.toJson(roomUsers, ListType);
+                        System.out.println();
+                        sendobject.put("users", jsonArrayList);
+                        sendobject.put("roomnumber", (int)chat.roomNumber);
+                        for (User user : roomUsers) {
+                            transmitter.setData(sendobject, user.ip);
+                            transmitter.run();
                         }
                     }
                 }

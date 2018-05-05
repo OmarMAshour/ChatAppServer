@@ -16,7 +16,7 @@ public class ChatAppServer {
     /**
      * @param args the command line arguments
      */
-    
+    public static ArrayList<MultiChat> multiChats = new ArrayList<MultiChat>();
     public static ArrayList<User> availableUsers = new ArrayList<User>();
     public static ArrayList<User> bannedUsers = new ArrayList<User>();
     public static Listener listener = new Listener();
