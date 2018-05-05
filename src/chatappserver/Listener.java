@@ -18,6 +18,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import static chatappserver.ChatAppServer.*;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import org.json.simple.JSONArray;
 import org.json.simple.parser.ParseException;
@@ -70,10 +72,12 @@ public class Listener extends Thread {
                                     JSONObject jsonToUser = new JSONObject();
 //                                    JSONArray users = new JSONArray();
 //                                    users.addAll(availableUsers);
+                                    Type ListType = new TypeToken<ArrayList<User>>(){}.getType();
                                     Gson gson = new Gson();
-                                    gson.toJson(availableUsers);
+                                    String jsonArrayList= gson.toJson(availableUsers, ListType);
+                                    System.out.println();
                                     jsonToUser.put("type", "sendusers");
-                                    jsonToUser.put("availableusers", gson);
+                                    jsonToUser.put("availableusers", jsonArrayList);
                                     transmitter.setData(jsonToUser, user.ip);
                                     transmitter.start();
                                 }
