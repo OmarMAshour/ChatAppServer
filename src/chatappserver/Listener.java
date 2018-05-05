@@ -17,6 +17,7 @@ import java.net.Socket;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import static chatappserver.ChatAppServer.*;
+import com.google.gson.Gson;
 import java.util.ArrayList;
 import org.json.simple.JSONArray;
 import org.json.simple.parser.ParseException;
@@ -67,10 +68,12 @@ public class Listener extends Thread {
                             for (User user : availableUsers) {
                                 if (user.online) {
                                     JSONObject jsonToUser = new JSONObject();
-                                    JSONArray users = new JSONArray();
-                                    users.addAll(availableUsers);
+//                                    JSONArray users = new JSONArray();
+//                                    users.addAll(availableUsers);
+                                    Gson gson = new Gson();
+                                    gson.toJson(availableUsers);
                                     jsonToUser.put("type", "sendusers");
-                                    jsonToUser.put("availableusers", users);
+                                    jsonToUser.put("availableusers", gson);
                                     transmitter.setData(jsonToUser, user.ip);
                                     transmitter.start();
                                 }
