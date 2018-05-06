@@ -13,11 +13,11 @@ import static chatappserver.ChatAppServer.*;
  * @author virtual
  */
 public class MultiChat {
-    public int roomNumber;
+    public long roomNumber;
     public ArrayList<User> roomUsers = new ArrayList<User>();
     
     public MultiChat(ArrayList<User> roomUsers){
-        int max =0;
+        long max =0;
         for(MultiChat multi: multiChats){
             if(multi.roomNumber>max){
                 max=multi.roomNumber;
